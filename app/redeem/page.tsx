@@ -1,0 +1,2 @@
+import Link from 'next/link';
+export default function RedeemPage(){return <main style={{padding:32,maxWidth:620,margin:'0 auto'}}><h1>Activate your purchase</h1><p>Sign in to your agency, then choose Purchase activation at the bottom of the page. Select itch.io or Gumroad and enter the key from your receipt.</p><p>Store listings and seller setup must be connected first. AppSumo vouchers are not supported.</p><Link href="/login">Sign in</Link></main>;}

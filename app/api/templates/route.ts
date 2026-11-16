@@ -1,0 +1,5 @@
+import {NextRequest,NextResponse} from 'next/server';
+import {loadOwnerWorkspace} from '@/lib/persistent-workspace';
+import {saveTemplate} from '@/lib/template-storage';
+export async function GET(){try{const scope=await loadOwnerWorkspace();let {data,error}=await scope.db.from('questionnaire_templates').select('*,questions:questionnaire_questions(*)').eq('agency_id',scope.agencyId);if(error)throw error;if(!data?.length){data=[];for(const template of scope.store.templates.slice(0,4))data.push(await saveTemplate(scope.db,scope.agencyId,template));}data=(data||[]).map((t:any)=>({...t,questions:t.questions.filter((q:any)=>!q.is_archived)}));return NextResponse.json({templates:data},{headers:{'Cache-Control':'private, no-store'}});}catch{return NextResponse.json({error:'Could not load saved templates.'},{status:503});}}
+export async function PUT(request:NextRequest){try{const scope=await loadOwnerWorkspace();const {template}=await request.json();return NextResponse.json({template:await saveTemplate(scope.db,scope.agencyId,template)});}catch{return NextResponse.json({error:'Template was not saved. Check the fields and connection.'},{status:400});}}

@@ -1,0 +1,1 @@
+-- Buyer edition: no unrestricted anonymous policies. Token portals must be served through server-only routes that validate the token and restrict fields.
