@@ -367,7 +367,7 @@ export default function SettingsPage() {
                       type="email"
                       value={supportEmail}
                       onChange={(e) => setSupportEmail(e.target.value)}
-                      placeholder="support@onboardflow.com"
+                      placeholder="support@example.invalid"
                     />
                   </div>
                 </div>

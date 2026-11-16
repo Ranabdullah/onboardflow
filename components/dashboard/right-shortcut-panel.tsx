@@ -253,7 +253,7 @@ export function RightShortcutPanel({
                     <input
                       type="email"
                       required
-                      placeholder="e.g. alex@company.com"
+                      placeholder="e.g. alex@example.invalid"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full px-3 py-2 text-xs rounded-lg border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"

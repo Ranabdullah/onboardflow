@@ -103,7 +103,7 @@ export function WizardStepAccess({ accessData, onChange }: WizardStepAccessProps
               Include Meta Partner ID, CMS logins, Canva/CapCut permissions, or posting instructions:
             </p>
             <Textarea
-              placeholder="e.g. Meta Business ID: 1029384756. Also please request access on Shopify staff account with email hello@agency.com..."
+              placeholder="e.g. Meta Business ID: 1029384756. Also please request access on Shopify staff account with email hello@example.invalid..."
               value={accessData.login_credentials_notes || ''}
               onChange={(e) => updateField('login_credentials_notes', e.target.value)}
               rows={3}

@@ -280,7 +280,7 @@ export function ClientModal({
               <Input
                 required
                 type="email"
-                placeholder="asif@acme.com"
+                placeholder="asif@example.invalid"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -305,7 +305,7 @@ export function ClientModal({
               </label>
               <Input
                 type="url"
-                placeholder="https://acme.com"
+                placeholder="https://example.com"
                 value={website}
                 onChange={(e) => setWebsite(e.target.value)}
               />

@@ -164,12 +164,13 @@ export function PricingCards() {
                   </div>
 
                   <div className="pt-8">
+                    {plan.id === 'enterprise' && !process.env.NEXT_PUBLIC_SUPPORT_EMAIL ? (
+                      <p className="text-xs text-zinc-600">Contact your workspace administrator for enterprise setup.</p>
+                    ) : (
                     <Link
-                      href={
-                        plan.id === 'enterprise'
-                          ? 'mailto:hello@onboardflow.com?subject=Enterprise%20Plan%20Inquiry'
-                          : `/signup?plan=${plan.id}`
-                      }
+                      href={plan.id === 'enterprise'
+                        ? `mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL}?subject=Enterprise%20Plan%20Inquiry`
+                        : `/signup?plan=${plan.id}`}
                       className="w-full block"
                     >
                       <Button
@@ -184,6 +185,7 @@ export function PricingCards() {
                         {plan.ctaText} &rarr;
                       </Button>
                     </Link>
+                    )}
                   </div>
                 </div>
               );

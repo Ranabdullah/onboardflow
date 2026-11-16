@@ -85,7 +85,7 @@ export default function SignUpPage() {
                 <Input
                   required
                   type="email"
-                  placeholder="you@agency.com"
+                  placeholder="you@example.invalid"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="bg-white border-zinc-300 text-zinc-900 placeholder:text-zinc-400 text-xs focus-visible:ring-blue-500"

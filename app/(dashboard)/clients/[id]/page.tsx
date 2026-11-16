@@ -48,28 +48,13 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
   }
 
   if (!client) {
-    // If running in development with mock/demo client
-    const demoClient: ClientWithDetails = {
-      id,
-      agency_id: 'demo-agency',
-      name: 'Sarah Connor',
-      email: 'sarah@skynet-solutions.com',
-      company: 'Skynet Defense',
-      status: 'in_progress',
-      onboarding_token: `ob_demo_${id}`,
-      package_share_token: `pkg_demo_${id}`,
-      questionnaire_template_id: null,
-      checklist_template_id: null,
-      last_activity_at: new Date().toISOString(),
-      completed_at: null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      uploads: [],
-      responses: [],
-      checklist_status: [],
-      brief: null,
-    };
-    return renderDetailContent(demoClient, activeTab, setActiveTab, loadClient);
+    return (
+      <div className="p-8 space-y-4">
+        <h1 className="font-bold">Client unavailable</h1>
+        <p>This record could not be loaded. It may have been removed or belong to a different workspace.</p>
+        <a className="text-blue-600 underline" href="/clients">Back to clients</a>
+      </div>
+    );
   }
 
   return renderDetailContent(client, activeTab, setActiveTab, loadClient);

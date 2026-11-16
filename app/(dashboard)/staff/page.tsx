@@ -415,7 +415,7 @@ export default function StaffPage() {
               <Input
                 type="email"
                 required
-                placeholder="jordan@agency.com"
+                placeholder="jordan@example.invalid"
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
                 className="text-xs h-9"

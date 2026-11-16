@@ -7,7 +7,7 @@ import {
 } from './templates';
 
 const resendApiKey = process.env.RESEND_API_KEY;
-const resendFromEmail = process.env.RESEND_FROM_EMAIL || 'OnboardFlow <onboarding@resend.dev>';
+const resendFromEmail = process.env.RESEND_FROM_EMAIL?.trim();
 
 const resend = resendApiKey && resendApiKey.trim() !== '' ? new Resend(resendApiKey) : null;
 
@@ -24,7 +24,7 @@ export async function sendClientInvitationEmail(params: {
       onboardingUrl: params.onboardingUrl,
     });
 
-    if (!resend) {
+    if (!resend || !resendFromEmail) {
       return { success: false, error: 'Email delivery is not configured. Share the client link manually.' };
     }
 
@@ -63,7 +63,7 @@ export async function sendClientReminderEmail(params: {
       customMessage: params.customMessage,
     });
 
-    if (!resend) {
+    if (!resend || !resendFromEmail) {
       return { success: false, error: 'Email delivery is not configured. Share the client link manually.' };
     }
 
@@ -97,7 +97,7 @@ export async function sendCompletionNotification(params: {
   try {
     const html = generateCompletionNotificationHtml(params);
 
-    if (!resend) {
+    if (!resend || !resendFromEmail) {
       return { success: false, error: 'Email delivery is not configured. Share the client link manually.' };
     }
 

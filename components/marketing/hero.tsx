@@ -80,7 +80,7 @@ export function MarketingHero() {
                 <div className="w-3 h-3 rounded-full bg-amber-500/80" />
                 <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
                 <span className="text-[11px] font-mono text-zinc-500 ml-2">
-                  onboardflow.com/onboard/ob_sarah_connor_demo
+                  example.invalid/onboard/example-project
                 </span>
               </div>
               <span className="text-[10px] uppercase font-bold tracking-wider text-purple-400 bg-purple-950/60 px-2 py-0.5 rounded-full border border-purple-800">
