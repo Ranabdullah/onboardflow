@@ -10,7 +10,7 @@ Remaining: Real email delivery, separate staff login accounts, AI brief accuracy
 
 ## Start
 
-Node.js 22+ and your own fresh Supabase project are required. Apply SQL migrations in this order: 001, 002, 003, 004, 005, 006, 20261005214234_persistent_workspace.sql, 20261006193735_template_configuration.sql. Copy Source/.env.example into your server environment file, set your own Supabase URL/public key and private service-role key. Configure Auth site/redirect URLs. Run npm ci, npm run build, npm start. Keep upload and contract buckets private. Never expose service-role, AI, email or cron secrets in NEXT_PUBLIC variables.
+Node.js 22+ and your own fresh Supabase project are required. Apply SQL migrations in this order: 001, 002, 003, 004, 005, 006, 20261005214234_persistent_workspace.sql, 20261006193735_template_configuration.sql. Copy .env.example into your server environment file, set your own Supabase URL/public key and private service-role key. Configure Auth site/redirect URLs. Run npm ci, npm run build, npm start. Keep upload and contract buckets private. Never expose service-role, AI, email or cron secrets in NEXT_PUBLIC variables.
 
 ## Using the app
 

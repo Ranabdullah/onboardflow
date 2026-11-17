@@ -31,7 +31,7 @@ export function Header({
   const brandColor = agency?.brand_color || '#2563eb';
 
   return (
-    <header className="h-16 border-b border-zinc-200 bg-white sticky top-0 z-20 px-6 sm:px-8 flex items-center justify-between gap-4">
+    <header className="min-h-16 flex-wrap py-3 border-b border-zinc-200 bg-white sticky top-0 z-20 px-4 sm:px-8 flex items-center justify-between gap-4">
       {/* Title & context */}
       <div className="shrink-0">
         <h1 className="text-base sm:text-lg font-bold text-zinc-900 tracking-tight flex items-center gap-2">
@@ -44,11 +44,12 @@ export function Header({
 
       {/* Gmail-Style Rounded Search Capsule */}
       {onSearchChange !== undefined && (
-        <div className="flex-1 max-w-xl mx-2 sm:mx-4 relative">
+        <div className="w-full sm:w-auto order-3 sm:order-none sm:flex-1 max-w-xl sm:mx-4 relative">
           <div className="relative flex items-center">
             <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 pointer-events-none" />
             <input
               type="text"
+              aria-label="Search clients, email, or company"
               placeholder="Search clients, email, or company..."
               value={searchQuery || ''}
               onChange={(e) => onSearchChange(e.target.value)}
@@ -82,6 +83,7 @@ export function Header({
         {onNewClient && (
           <Button
             onClick={onNewClient}
+            aria-label="New client"
             className="text-xs gap-1.5 rounded-full px-4 h-9 shadow-xs font-semibold cursor-pointer"
             style={{ backgroundColor: brandColor }}
           >

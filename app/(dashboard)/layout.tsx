@@ -14,7 +14,7 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) return <main style={{padding:32}}><h1>Set up your own OnboardFlow cloud</h1><p>Follow OWN-CLOUD.md in your download. No seller database is configured.</p></main>;
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) return <main style={{padding:32}}><h1>Set up your own OnboardFlow cloud</h1><p>Follow README.md in your download. No seller database is configured.</p></main>;
   const buyerClient=await createClient();const {data:{user:buyerUser}}=await buyerClient.auth.getUser();if(!buyerUser)redirect('/login');
   if(process.env.ACTIVATION_REQUIRED==='true'&&!(await purchaseLicense.status()).valid)return <main style={{padding:32}}><h1>Activate your purchased installation</h1><p>Open Purchase activation below and enter the key from your receipt. Your saved data remains in your own database.</p></main>;
   let agency: Agency | null = null;

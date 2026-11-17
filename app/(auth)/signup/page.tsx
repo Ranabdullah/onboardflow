@@ -39,7 +39,6 @@ export default function SignUpPage() {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error signing up';
       error('Sign up notice', msg);
-      router.push('/');
     } finally {
       setIsLoading(false);
     }
@@ -99,7 +98,9 @@ export default function SignUpPage() {
                 <Input
                   required
                   type="password"
-                  placeholder="At least 6 characters"
+                  minLength={12}
+                  autoComplete="new-password"
+                  placeholder="At least 12 characters"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="bg-white border-zinc-300 text-zinc-900 placeholder:text-zinc-400 text-xs focus-visible:ring-blue-500"

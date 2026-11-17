@@ -43,7 +43,7 @@ export default function SettingsPage() {
   const [whatsappWebhookUrl, setWhatsappWebhookUrl] = useState('');
   const [slackWebhookUrl, setSlackWebhookUrl] = useState('');
   const [genericWebhookUrl, setGenericWebhookUrl] = useState('');
-  const [stripePaymentLink, setStripePaymentLink] = useState('https://buy.stripe.com/demo_checkout_link');
+  const [stripePaymentLink, setStripePaymentLink] = useState('');
   const [isSavingIntegrations, setIsSavingIntegrations] = useState(false);
 
   // Reminder settings state
@@ -72,7 +72,7 @@ export default function SettingsPage() {
             setWhatsappWebhookUrl(data.agency.whatsapp_webhook_url || '');
             setSlackWebhookUrl(data.agency.slack_webhook_url || '');
             setGenericWebhookUrl(data.agency.webhook_url || '');
-            setStripePaymentLink(data.agency.stripe_payment_link || 'https://buy.stripe.com/demo_checkout_link');
+            setStripePaymentLink(data.agency.stripe_payment_link || '');
           }
         }
       } catch (e) {

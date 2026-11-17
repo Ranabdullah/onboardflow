@@ -1,61 +1,68 @@
 'use strict';
-const $=selector=>document.querySelector(selector);
-function view(id){
-  for(const button of document.querySelectorAll('[data-view]')) button.setAttribute('aria-pressed',button.dataset.view===id);
-  for(const panel of document.querySelectorAll('[data-panel]')) panel.hidden=panel.dataset.panel!==id;
+(()=>{
+const $=s=>document.querySelector(s), all=s=>[...document.querySelectorAll(s)];
+const key='onboardflow-workspace-v3', version=3;
+const uid=()=>crypto.randomUUID();
+const text=(tag,value,cls)=>{const el=document.createElement(tag);el.textContent=value;if(cls)el.className=cls;return el};
+const button=(label,fn,cls='')=>{const el=text('button',label,cls);el.type='button';el.onclick=fn;return el};
+const today=()=>new Date().toLocaleDateString('en-CA');
+const date=value=>value?new Date(value+'T12:00:00').toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}):'No date set';
+const future=days=>{const d=new Date();d.setDate(d.getDate()+days);return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
+const blank=()=>({goal:'',priority:'Website & enquiries',launch:'',scope:'',site:'',budget:'To discuss',assets:'',constraints:''});
+const seed=()=>({version,agency:{name:'Northline Studio',color:'#3159d9'},clients:[{id:'west-quay',name:'Alex Morgan',company:'West Quay Studio',service:'Website redesign',owner:'Jamie',email:'alex@example.invalid',archived:false,brief:blank(),submitted:false,tasks:[],updated:new Date().toISOString()},{id:'field-notes',name:'Taylor Reed',company:'Field Notes Co.',service:'Brand identity',owner:'Sam',email:'taylor@example.invalid',archived:false,brief:{...blank(),goal:'Introduce a welcoming identity for an independent stationery brand.',priority:'Brand identity',launch:future(21),scope:'A flexible logo, colour palette and packaging guidelines for everyday stationery.',assets:'Existing product photographs and draft brand story.',constraints:'Confirm packaging sizes before production.'},submitted:true,tasks:[{id:'sample-task-1',title:'Review brand goals and audience',owner:'Sam',due:future(1),done:true},{id:'sample-task-2',title:'Confirm packaging sizes',owner:'Sam',due:future(3),done:false},{id:'sample-task-3',title:'Prepare the kickoff plan',owner:'Jamie',due:future(5),done:false}],updated:new Date().toISOString()}],activity:[{id:uid(),at:new Date().toISOString(),message:'Example workspace ready. Try an intake or add a fictional client.'}]});
+const cleanString=(v,max=2000)=>typeof v==='string'&&v.length<=max;
+function validate(value){
+ if(!value||value.version!==version||!value.agency||!cleanString(value.agency.name,80)||!/^#[0-9a-f]{6}$/i.test(value.agency.color)||!Array.isArray(value.clients)||value.clients.length>100||!Array.isArray(value.activity)||value.activity.length>200)throw Error('Choose an OnboardFlow v3 workspace backup.');
+ const ids=new Set();for(const c of value.clients){if(!c||!cleanString(c.id,100)||ids.has(c.id)||!cleanString(c.name,80)||!cleanString(c.company,100)||!cleanString(c.service,100)||!cleanString(c.owner,80)||!cleanString(c.email,160)||typeof c.archived!=='boolean'||typeof c.submitted!=='boolean'||!Number.isFinite(Date.parse(c.updated))||!c.brief||!Array.isArray(c.tasks)||c.tasks.length>200)throw Error('The backup contains an invalid client.');ids.add(c.id);for(const field of Object.keys(blank()))if(!cleanString(c.brief[field],2000))throw Error('The backup contains invalid intake answers.');for(const field of ['launch'])if(c.brief[field]&&!/^\d{4}-\d{2}-\d{2}$/.test(c.brief[field]))throw Error('Invalid launch date.');const tids=new Set();for(const t of c.tasks){if(!t||!cleanString(t.id,100)||tids.has(t.id)||!cleanString(t.title,160)||!cleanString(t.owner,80)||typeof t.done!=='boolean'||!cleanString(t.due,10)||(t.due&&!/^\d{4}-\d{2}-\d{2}$/.test(t.due)))throw Error('The backup contains invalid tasks.');tids.add(t.id)}}
+ for(const a of value.activity)if(!a||!cleanString(a.message,400)||!Number.isFinite(Date.parse(a.at)))throw Error('The backup contains invalid activity.');
+ // Copy known fields, so unknown import properties never become application settings.
+ return {version,agency:{name:value.agency.name,color:value.agency.color},clients:value.clients.map(c=>({id:c.id,name:c.name,company:c.company,service:c.service,owner:c.owner,email:c.email,archived:c.archived,submitted:c.submitted,updated:c.updated,brief:Object.fromEntries(Object.keys(blank()).map(k=>[k,c.brief[k]])),tasks:c.tasks.map(t=>({id:t.id,title:t.title,owner:t.owner,due:t.due,done:t.done}))})),activity:value.activity.map(a=>({id:uid(),at:a.at,message:a.message}))};
 }
-for(const button of document.querySelectorAll('[data-view]')) button.onclick=()=>view(button.dataset.view);
-
-const tasks=['Review client brief','Prepare sitemap','Draft project proposal'];
-const key='onboardflow-sample-v2';
-let brief;
-const completed=new Set();
-try{
-  const saved=JSON.parse(localStorage.getItem(key));
-  brief=saved?.brief;
-  (saved?.completed||[]).forEach(index=>completed.add(index));
-}catch{}
-function save(){
-  try{localStorage.setItem(key,JSON.stringify({brief,completed:[...completed]}));}catch{}
-}
-function updateProgress(){
-  $('#status').textContent=brief?completed.size+' of '+tasks.length+' tasks complete.':'';
-  $('#progress').hidden=!brief;
-  $('#progress').value=completed.size;
-  $('#stage').textContent=brief?(completed.size===tasks.length?'Checklist complete':'Project started'):'Intake requested';
-}
-function render(){
-  $('#goal').textContent=brief ? brief.goal+' · '+brief.priority : 'Submit the sample intake to start the project.';
-  $('#assetsSummary').textContent=brief?[brief.site,brief.assets].filter(Boolean).join(' · '):'';
-  $('#tasks').replaceChildren();
-  updateProgress();
-  if(!brief) return;
-  tasks.forEach((task,index)=>{
-    const row=document.createElement('li');
-    const label=document.createElement('label');
-    const input=document.createElement('input'); input.type='checkbox';input.style.width='auto';input.checked=completed.has(index);
-    input.onchange=()=>{if(input.checked) completed.add(index);else completed.delete(index);save();updateProgress();};
-    label.style.display='inline';label.append(input,' '+task);row.append(label);$('#tasks').append(row);
-  });
-}
-let step=1;
-function intakeStep(next){
-  step=next;
-  $('#stepLabel').textContent='Step '+step+' of 2';
-  $('#intakeGoal').hidden=step!==1;
-  $('#intakeAssets').hidden=step!==2;
-  $('#next').hidden=step!==1;
-  $('#previous').hidden=step!==2;
-  $('#complete').hidden=step!==2;
-}
-$('#intake').onclick=()=>{intakeStep(1);view('intake');};
-$('#previous').onclick=()=>intakeStep(1);
-$('#next').onclick=()=>{if($('#brief').elements.goal.reportValidity())intakeStep(2);};
-$('#brief').onsubmit=event=>{
-  event.preventDefault();
-  if(step!==2)return;
-  brief=Object.fromEntries(new FormData(event.currentTarget));
-  save();render();view('tasks');
-};
-if(brief)for(const [field,value] of Object.entries(brief))if($('#brief').elements[field])$('#brief').elements[field].value=value;
-view('clients');render();
+let state=seed();let storageFailed=false;
+try{const saved=localStorage.getItem(key);if(saved)state=validate(JSON.parse(saved));}catch{storageFailed=true}
+let selected=state.clients.find(c=>!c.archived)?.id||'',current='overview',step=0,tour=0;
+try{const previous=sessionStorage.getItem(key+'-client');if(state.clients.some(c=>c.id===previous&&!c.archived))selected=previous;}catch{}
+const client=()=>state.clients.find(c=>c.id===selected&&!c.archived);
+function announce(message){$('#status').hidden=false;$('#status').textContent=message}
+function save(){try{localStorage.setItem(key,JSON.stringify(state));return true}catch{storageFailed=true;announce('Browser storage is unavailable or full. Download a backup before leaving this page.');return false}}
+function log(message){state.activity.unshift({id:uid(),at:new Date().toISOString(),message});state.activity=state.activity.slice(0,200);save()}
+function applyBrand(){const color=state.agency.color;document.documentElement.style.setProperty('--brand',color);const rgb=color.slice(1).match(/../g).map(v=>parseInt(v,16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);document.documentElement.style.setProperty('--brand-ink',rgb[0]*.2126+rgb[1]*.7152+rgb[2]*.0722>.179?'#15213a':'#fff');$('#agencyName').textContent=state.agency.name;$('#agencyInitial').textContent=state.agency.name.slice(0,1).toUpperCase();$('#brandingForm').elements.name.value=state.agency.name;$('#brandingForm').elements.color.value=color}
+function view(id){if(!['overview','clients','intake','projects','activity','settings'].includes(id))id='overview';current=id;try{sessionStorage.setItem(key+'-client',selected)}catch{}all('[data-panel]').forEach(el=>el.hidden=el.dataset.panel!==id);all('[data-view]').forEach(el=>el.setAttribute('aria-pressed',el.dataset.view===id));$('#breadcrumb').textContent=({'overview':'Overview',clients:'Clients',intake:'Client intake',projects:'Projects & tasks',activity:'Activity',settings:'Settings & help'})[id];if(id==='intake'){renderPickers();loadIntake()}if(id==='projects'){renderPickers();renderProject()}if(id==='clients')renderClients();if(id==='activity')renderActivity();if(id==='overview')renderOverview();history.replaceState(null,'','#'+id);window.scrollTo({top:0,behavior:'instant'})}
+function go(id,cid){if(cid)selected=cid;view(id)}
+all('[data-view]').forEach(el=>el.onclick=()=>view(el.dataset.view));all('[data-go]').forEach(el=>el.onclick=()=>view(el.dataset.go));
+function active(){return state.clients.filter(c=>!c.archived)}
+const completed=c=>c.tasks.filter(t=>t.done).length;
+const percent=c=>c.tasks.length?Math.round(completed(c)/c.tasks.length*100):0;
+const stage=c=>!c.submitted?'Awaiting intake':c.tasks.length&&completed(c)===c.tasks.length?'Ready for handoff':'Project started';
+function stats(target){const clients=active(),projects=clients.filter(c=>c.submitted),tasks=projects.flatMap(c=>c.tasks);$(target).replaceChildren(...[[clients.length,'Active clients','People & projects'],[clients.filter(c=>!c.submitted).length,'Awaiting intake','The next conversation'],[projects.length,'Projects started','Briefs collected'],[tasks.filter(t=>!t.done).length,'Open tasks','A clear next step']].map(([value,label,hint])=>{const el=text('div','','stat');el.append(text('small',label),text('strong',value),text('span',hint));return el}))}
+function renderOverview(){stats('#stats');const rows=active().slice(0,5).map(c=>{const el=text('div','','client-row');const label=text('div','');label.append(text('strong',c.company),text('small',c.service+' · '+c.owner));el.append(text('span',c.company.slice(0,1),'avatar'),label,text('span',stage(c),'tag'+(c.submitted?' success':'')),button(c.submitted?'Open project →':'Start intake →',()=>go(c.submitted?'projects':'intake',c.id)));return el});$('#pipeline').replaceChildren(...(rows.length?rows:[text('p','Add your first fictional client.','muted')]));const upcoming=active().flatMap(c=>c.tasks.filter(t=>!t.done).map(t=>({c,t}))).sort((a,b)=>(a.t.due||'9999').localeCompare(b.t.due||'9999')).slice(0,4);$('#upcoming').replaceChildren(...(upcoming.length?upcoming.map(({c,t})=>{const row=text('div','','task-preview'),label=text('div','');label.append(text('strong',t.title),text('small',c.company+' · '+(t.owner||'Unassigned')+' · '+date(t.due)));row.append(label,button('View →',()=>go('projects',c.id),'quiet'));return row}):[text('p','No open tasks. Your next project starts with a client intake.','muted')]))}
+function renderClients(){const archived=$('#clientFilter').value==='archived',q=$('#clientSearch').value.trim().toLowerCase();const rows=state.clients.filter(c=>c.archived===archived&&[c.company,c.name,c.service].join(' ').toLowerCase().includes(q));$('#clientGrid').replaceChildren(...rows.map(c=>{const card=text('article','','card client-card'),meta=text('div','','meta'),actions=text('div','','actions');meta.append(text('span',c.service,'tag'),text('span',stage(c),'tag'+(c.submitted?' success':'')));card.append(text('span',c.company.slice(0,1),'avatar'),text('h2',c.company),text('p',c.name+' · '+(c.owner||'Unassigned owner'),'muted'),meta);if(c.archived)actions.append(button('Restore client',()=>{c.archived=false;selected=c.id;log(c.company+' restored.');renderClients()}));else actions.append(button(c.submitted?'View project':'Open intake',()=>go(c.submitted?'projects':'intake',c.id),'primary'),button('Edit',()=>openClient(c)),button('Archive',()=>{if(!confirm('Archive '+c.company+'? Its brief and tasks are retained and can be restored.'))return;c.archived=true;if(selected===c.id)selected=active()[0]?.id||'';log(c.company+' archived.');renderClients()},'quiet'));card.append(actions);return card}));if(!rows.length)$('#clientGrid').append(text('div',archived?'No archived clients.':'No matching clients. Add a client or change your search.','card empty'))}
+$('#clientSearch').oninput=renderClients;$('#clientFilter').onchange=renderClients;
+function openClient(c){$('#clientForm').reset();$('#clientDialogTitle').textContent=c?'Edit client':'Add a client';for(const name of ['id','name','company','service','owner','email'])if(c)$('#clientForm').elements[name].value=c[name];$('#clientDialog').showModal()}
+$('#newClient').onclick=()=>openClient();$('#closeClient').onclick=()=>$('#clientDialog').close();
+$('#clientForm').onsubmit=e=>{e.preventDefault();if(!e.currentTarget.reportValidity())return;const fields=Object.fromEntries(new FormData(e.currentTarget));for(const k of ['name','company'])if(!fields[k].trim())return announce('Enter a name and company.');let c=state.clients.find(c=>c.id===fields.id);if(!c){if(state.clients.length>=100)return announce('This demo supports up to 100 clients. Export a backup before clearing records.');c={id:uid(),archived:false,submitted:false,brief:blank(),tasks:[]};state.clients.push(c)}for(const k of ['name','company','service','owner','email'])c[k]=fields[k].trim();c.updated=new Date().toISOString();selected=c.id;log(c.company+' client details saved.');$('#clientDialog').close();view('clients');announce('Client saved in this browser.')};
+function renderPickers(){if(!client())selected=active()[0]?.id||'';for(const id of ['#intakeClient','#projectClient']){const select=$(id);select.replaceChildren(...active().map(c=>{const option=text('option',c.company);option.value=c.id;return option}));if(!active().length){const option=text('option','Add a client first');option.value='';select.append(option)}select.value=selected}}
+function draft(){const c=client();if(!c)return;for(const key of Object.keys(blank()))c.brief[key]=$('#intakeForm').elements[key].value;c.updated=new Date().toISOString();save();$('#draftStatus').textContent=storageFailed?'Download a backup before leaving.':'Draft saved in this browser.'}
+function loadIntake(){const c=client(),form=$('#intakeForm');for(const control of form.elements)control.disabled=!c;$('#intakeTitle').textContent=c?c.company+' · '+c.service:'Add a client to begin';for(const k of Object.keys(blank()))form.elements[k].value=c?.brief[k]||blank()[k];form.elements.confirm.checked=false;setStep(0)}
+function setStep(next){step=next;all('[data-intake-step]').forEach(el=>{const hidden=Number(el.dataset.intakeStep)!==step;el.hidden=hidden;for(const field of el.querySelectorAll('input,textarea,select'))field.disabled=hidden||!client()});all('[data-step]').forEach(el=>el.classList.toggle('active',Number(el.dataset.step)<=step));$('#stepLabel').textContent='Step '+(step+1)+' of 3';$('#intakeBack').hidden=step===0;$('#intakeNext').hidden=step===2;$('#submitIntake').hidden=step!==2;if(step===2&&client())briefView('#intakeReview',client())}
+$('#intakeForm').oninput=()=>{if(step<2)draft()};$('#intakeBack').onclick=()=>setStep(Math.max(0,step-1));$('#intakeNext').onclick=()=>{if(!client())return;const fields=all('[data-intake-step="'+step+'"] input,[data-intake-step="'+step+'"] textarea,[data-intake-step="'+step+'"] select');if(fields.some(el=>!el.reportValidity()))return;if(step===0&&!$('#intakeForm').elements.goal.value.trim())return announce('Describe the project goal first.');draft();setStep(Math.min(2,step+1))};
+$('#intakeClient').onchange=e=>{selected=e.target.value;try{sessionStorage.setItem(key+'-client',selected)}catch{}loadIntake()};$('#projectClient').onchange=e=>{selected=e.target.value;try{sessionStorage.setItem(key+'-client',selected)}catch{}renderProject()};
+function briefParts(c){return [['Project goal',c.brief.goal],['Priority',c.brief.priority],['Deliverables & audience',c.brief.scope||'Confirm the deliverables with the client.'],['Target launch',date(c.brief.launch)],['Budget range',c.brief.budget],['Website',c.brief.site||'Not supplied'],['Assets & links',c.brief.assets||'Confirm available assets.'],['Open questions & constraints',c.brief.constraints||'No constraints recorded. Confirm approvals at kickoff.']]}
+function briefView(target,c){$(target).replaceChildren(...briefParts(c).flatMap(([heading,body])=>[text('h3',heading),text('p',body)]))}
+$('#intakeForm').onsubmit=e=>{e.preventDefault();const c=client();if(step!==2||!c)return;if(!e.currentTarget.elements.confirm.checked)return announce('Review the brief and tick the confirmation before submitting.');if(!c.brief.goal.trim())return announce('Add a project goal first.');if(!c.submitted)c.tasks=['Review the client brief','Confirm assets and open questions','Schedule the project kickoff'].map((title,i)=>({id:uid(),title,owner:c.owner,due:future(i+1),done:false}));c.submitted=true;c.updated=new Date().toISOString();log(c.company+' intake submitted; project brief updated.');view('projects');announce('Project brief saved. Existing tasks are preserved when the intake is revised.')};
+function renderProject(){const c=client(),ready=!!c?.submitted;$('#projectEmpty').hidden=ready;$('#projectContent').hidden=!ready;if(!ready)return;$('#projectTitle').textContent=c.company+' · '+c.service;briefView('#projectBrief',c);const pc=percent(c);$('#taskCount').textContent=completed(c)+' / '+c.tasks.length;$('#progressPercent').textContent=pc+'%';$('#taskProgress').value=pc;$('.progress-ring').style.setProperty('--progress',pc+'%');const overdue=c.tasks.filter(t=>!t.done&&t.due&&t.due<today()).length;$('#projectHealth').textContent=overdue?overdue+' overdue task'+(overdue===1?'':'s')+'. Review the plan and due dates.':c.tasks.length&&pc===100?'All tasks complete. Review deliverables before handing off.':'Keep tasks small, owned and dated.';const filter=$('#taskFilter').value;const rows=c.tasks.filter(t=>filter==='all'||(filter==='completed'?t.done:!t.done));$('#taskList').replaceChildren(...rows.map(t=>{const row=text('div','','task-row'),label=document.createElement('label'),input=document.createElement('input'),copy=text('span','');input.type='checkbox';input.checked=t.done;input.setAttribute('aria-label','Complete '+t.title);input.onchange=()=>{t.done=input.checked;log(c.company+': '+t.title+(t.done?' completed.':' reopened.'));renderProject()};copy.append(text('b',t.title),text('small',(t.owner||'Unassigned')+' · '+date(t.due),!t.done&&t.due&&t.due<today()?'overdue':''));label.append(input,copy);const remove=button('×',()=>{if(!confirm('Remove this task?'))return;c.tasks=c.tasks.filter(task=>task.id!==t.id);log(c.company+': task removed.');renderProject()},'remove-task');remove.setAttribute('aria-label','Remove '+t.title);row.append(label,remove);return row}));if(!rows.length)$('#taskList').append(text('p','No tasks in this view.','hint'))}
+$('#taskFilter').onchange=renderProject;$('#taskForm').onsubmit=e=>{e.preventDefault();const c=client();if(!c?.submitted)return;const data=Object.fromEntries(new FormData(e.currentTarget));if(!data.title.trim())return;if(c.tasks.length>=200)return announce('This demo supports 200 tasks per project.');c.tasks.push({id:uid(),title:data.title.trim(),owner:data.owner.trim(),due:data.due,done:false});log(c.company+': '+data.title.trim()+' added.');e.currentTarget.reset();renderProject()};$('#editIntake').onclick=()=>view('intake');
+function download(filename,body,type){const url=URL.createObjectURL(new Blob([body],{type}));const link=document.createElement('a');link.href=url;link.download=filename;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+$('#downloadBrief').onclick=()=>{const c=client();if(!c)return;download('OnboardFlow-'+c.company.replace(/[^\p{L}\p{N} _-]/gu,'').slice(0,60)+'-brief.txt',state.agency.name+' · OnboardFlow project brief\n'+c.company+'\n\n'+briefParts(c).map(([h,b])=>h+'\n'+b).join('\n\n'),'text/plain;charset=utf-8')};$('#printBrief').onclick=()=>window.print();
+function renderActivity(){stats('#reportStats');$('#activityList').replaceChildren(...state.activity.map(a=>{const row=text('div','','activity-row'),time=text('time',new Date(a.at).toLocaleString());time.dateTime=a.at;row.append(text('p',a.message),time);return row}))}
+$('#exportCsv').onclick=()=>{const cell=v=>'"'+String(v).replace(/^[=+@\-\t\r]/,"'$&").replaceAll('"','""')+'"';const rows=[['Company','Contact','Service','Owner','Stage','Archived','Launch date','Tasks','Completed'],...state.clients.map(c=>[c.company,c.name,c.service,c.owner,stage(c),c.archived?'Yes':'No',c.brief.launch,c.tasks.length,completed(c)])];download('OnboardFlow-client-report.csv','\uFEFF'+rows.map(r=>r.map(cell).join(',')).join('\r\n'),'text/csv;charset=utf-8')};
+$('#brandingForm').onsubmit=e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.currentTarget));if(!data.name.trim())return;state.agency={name:data.name.trim(),color:data.color};log('Workspace identity updated.');applyBrand();announce('Workspace identity saved.')};
+$('#exportBackup').onclick=()=>download('OnboardFlow-workspace-backup.json',JSON.stringify(state,null,2),'application/json');$('#importBackup').onclick=()=>$('#backupFile').click();$('#backupFile').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>2*1024*1024)throw Error('Choose a backup smaller than 2 MB.');const restored=validate(JSON.parse(await file.text()));if(!confirm('Replace this browser workspace with the backup? Download a backup of your current records first.'))return;state=restored;selected=active()[0]?.id||'';log('Workspace restored from backup.');applyBrand();view('overview');announce('Backup restored.')}catch(error){announce(error.message||'This backup could not be imported.')}finally{e.target.value=''}};
+$('#resetDemo').onclick=()=>{if(!confirm('Reset this demo and remove its current records from this browser? Download a backup first if you want to keep them.'))return;state=seed();selected=state.clients[0].id;save();applyBrand();view('overview');announce('Example workspace restored.')};
+const tours=[['overview','Welcome to a calmer kickoff.','OnboardFlow brings client details, the brief and project tasks into one workspace. This example stays in your browser.'],['clients','Every client, one clear record.','Add a fictional client, find a record, or archive and restore it. The original intake and tasks stay together.'],['intake','Collect the details once.','Move through the project, details and review steps. Drafts save as you type; submitting creates a project brief.'],['projects','Turn the brief into action.','Review the brief, add tasks with owners and dates, and track progress. Download notes or print the brief as a PDF.'],['settings','Keep control of your workspace.','Change the agency name and colour, export a backup, or restore one. Follow the setup guide for private accounts and cloud storage.']];
+function showTour(index){tour=index;if(index===3)selected=active().find(c=>c.submitted)?.id||selected;const [v,title,body]=tours[tour];view(v);$('#tourCount').textContent='QUICK TOUR · '+(tour+1)+' OF '+tours.length;$('#tourTitle').textContent=title;$('#tourText').textContent=body;$('#tourNext').textContent=tour===tours.length-1?'Explore workspace →':'Next →';if(!$('#tourDialog').open)$('#tourDialog').showModal()}
+$('#tourStart').onclick=$('#tourAgain').onclick=()=>showTour(0);$('#tourNext').onclick=()=>{if(tour<tours.length-1)showTour(tour+1);else{$('#tourDialog').close();view('overview')}};$('#tourSkip').onclick=()=>$('#tourDialog').close();$('#tryIntake').onclick=()=>{selected=active().find(c=>!c.submitted)?.id||selected;view('intake')};
+// Tabs in another window must never silently overwrite unsaved local changes.
+window.addEventListener('storage',event=>{if(event.key===key&&event.newValue){try{state=validate(JSON.parse(event.newValue));applyBrand();view(current);announce('Workspace updated from another tab.')}catch{announce('Another tab supplied invalid workspace data. Download your current backup.')}}});
+applyBrand();view(location.hash.slice(1)||'overview');if(storageFailed)announce('Saved browser data could not be loaded. Download backups regularly.');
+})();

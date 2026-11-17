@@ -1,3 +1,4 @@
+import {loadOwnerWorkspace} from '@/lib/persistent-workspace';
 import {buyerApiSession} from '@/lib/buyer-api-session';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
@@ -15,7 +16,9 @@ export async function GET(request: NextRequest) {
   query=archived?query.eq('is_archived',true):query.or('is_archived.is.null,is_archived.eq.false');
   const {data,error}=await query.order('created_at',{ascending:false});
   if(error)return NextResponse.json({error:'Could not load saved clients. Please retry.'},{status:503});
-  return NextResponse.json({clients:data||[]},{headers:{'Cache-Control':'private, no-store'}});
+  const workspace=(await loadOwnerWorkspace()).store;
+  const clients=(data||[]).map(client=>{const saved=workspace.getClientWithDetails(client.id);return saved?{...client,responses:saved.responses,checklist_status:saved.checklist_status,brief:saved.brief}:client;});
+  return NextResponse.json({clients},{headers:{'Cache-Control':'private, no-store'}});
  } catch {return NextResponse.json({error:'Your database is unavailable. No temporary records are shown.'},{status:503});}
 }
 export async function POST(request: NextRequest) {

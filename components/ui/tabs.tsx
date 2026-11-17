@@ -19,15 +19,17 @@ export interface TabsProps {
 
 export function Tabs({ tabs, activeTab, onChange, className }: TabsProps) {
   return (
-    <div className={cn('flex flex-wrap items-center gap-1.5', className)}>
+    <div className={cn('flex flex-wrap items-center gap-2', className)}>
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
         return (
           <button
             key={tab.id}
+            type="button"
+            aria-pressed={isActive}
             onClick={() => onChange(tab.id)}
             className={cn(
-              'flex items-center gap-2 py-1.5 px-3.5 rounded-full text-xs font-medium transition-all cursor-pointer outline-none',
+              'flex items-center gap-2 min-h-11 py-2 px-3.5 rounded-full text-xs font-medium transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600',
               isActive
                 ? 'bg-[#c2e7ff] text-[#001d35] font-semibold shadow-2xs'
                 : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'
