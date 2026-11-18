@@ -14,6 +14,7 @@ A client onboarding workspace for agencies: collect a clear brief, organise the 
 - **Projects & tasks:** a structured brief from the original answers, kickoff checklist, custom tasks with owners and dates, filters and completion progress. Revising an intake preserves the task list.
 - **Activity:** dated changes and a CSV client report.
 - **Settings & help:** agency name and colour with automatic button text contrast, a replayable guided tour, JSON backup/import and demo reset.
+- **Connect Supabase:** an Owner / Manager / Staff role walkthrough, private installation steps and an empty configuration template. Real staff access requires a configured backend and end-to-end verification. [Read the connection guide](docs/CONNECT-SUPABASE.md).
 - **Exports:** download the project brief as text or use Print / PDF. CSV reports open in Excel.
 
 The public demo uses fictional data and browser storage. It has no public signup, cloud sync, real uploads, email delivery or external AI calls. Its brief is extracted from the answers. Do not enter real client information. A demo JSON backup restores records and tasks, not cloud files or credentials.
@@ -69,7 +70,7 @@ For an API-uploaded Worker bundle:
 node scripts/build-demo.mjs
 ```
 
-This generates `dist-demo/worker.mjs`, a self-contained Worker with the four public demo assets and response security headers. Use your own Cloudflare account's deployment tooling to upload it as an ES module. No Supabase credentials belong in this demo.
+This generates `dist-demo/worker.mjs`, a self-contained Worker with the public demo assets and response security headers. Use your own Cloudflare account's deployment tooling to upload it as an ES module. No Supabase credentials belong in this demo.
 
 ## Backups, ownership and limits
 
