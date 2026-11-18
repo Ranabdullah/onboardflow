@@ -8,16 +8,22 @@ A client onboarding workspace for agencies: collect a clear brief, organise the 
 
 ## What you can try
 
-- **Overview:** client pipeline, intake counts and upcoming dated tasks.
-- **Clients:** add and edit fictional clients, search, archive and restore records.
-- **Client intake:** a three-step questionnaire for goals, deliverables, launch date, budget, assets and constraints. Drafts save as you type.
-- **Projects & tasks:** a structured brief from the original answers, kickoff checklist, custom tasks with owners and dates, filters and completion progress. Revising an intake preserves the task list.
-- **Activity:** dated changes and a CSV client report.
-- **Settings & help:** agency name and colour with automatic button text contrast, a replayable guided tour, JSON backup/import and demo reset.
-- **Connect Supabase:** an Owner / Manager / Staff role walkthrough, private installation steps and an empty configuration template. Real staff access requires a configured backend and end-to-end verification. [Read the connection guide](docs/CONNECT-SUPABASE.md).
-- **Exports:** download the project brief as text or use Print / PDF. CSV reports open in Excel.
+- **Staff & managers:** fictional staff profiles, departments, demo roles, active/inactive status, grid/list views, search, editing/deletion and assigned-client lists.
+- **Clients:** add/edit clients, choose an industry category or create your own, filter by category/manager, assign multiple staff, archive and restore.
+- **Client workspace:** contact/website/social/Drive links; communication notes, assets, dated local visibility observations, vouchers, branches, campaigns, calendar entries, tasks and activity history. Email/WhatsApp buttons compose in your own app; they do not send automatically.
+- **Client intake:** a three-step questionnaire and saved draft. Submitted answers become a project brief and kickoff tasks; revisions preserve the task list.
+- **Tasks:** Dashboard, Board, List, Charts, Calendar, Timeline and Tickets, backed by the same records. Multiple assignees, priority, status, start/due dates, search/filters, comments and in-app date reminders.
+- **My Work:** staff/month filters, design/general, SEO and video views, daily status notes, demo manager checks, monthly calendar, a browser timer and labelled manual hours.
+- **Workflows:** ordered staff handoffs followed by a demo manager approval. Stuck and overdue work remains visible.
+- **Reports:** monthly performance counts, hours, daily audit, attendance entries and staff logs, with CSV and Print / PDF. Figures come from saved records, not invented performance scores.
+- **Overview & utilities:** task status counts, upcoming work, workspace search, task alerts, actual browser clock and client archive with confirmed permanent deletion.
+- **Settings & help:** branding, guided tour, JSON backup/import/reset, plus a [Supabase connection guide](docs/CONNECT-SUPABASE.md) and empty configuration download.
 
-The public demo uses fictional data and browser storage. It has no public signup, cloud sync, real uploads, email delivery or external AI calls. Its brief is extracted from the answers. Do not enter real client information. A demo JSON backup restores records and tasks, not cloud files or credentials.
+[Read the agency demo guide](docs/DEMO-AGENCY.md).
+
+![Staff profiles and assigned clients](docs/team-workspace.png)
+
+The public demo uses fictional data and browser storage. It has no public signup, verified staff sessions, shared cloud sync, real file uploads, email delivery or external AI calls. Profiles and approval buttons demonstrate the workflow; they do not enforce account permissions. Connect and verify a private installation for real staff accounts. Do not enter real client information. Demo JSON backups preserve browser records, not cloud files or credentials.
 
 ## How to use
 
@@ -28,6 +34,8 @@ The public demo uses fictional data and browser storage. It has no public signup
 5. Download or print the brief. **Activity** exports a CSV report.
 6. **Settings & help → Download backup** saves all demo records. **Import backup** replaces this browser workspace after confirmation. Export first if you want to keep its current records.
 7. Archive a client to retain the record outside the active pipeline. Restore it from the archived filter.
+
+Use **Staff & managers**, **Tasks**, **My Work**, **Workflows** and **Reports** to try the expanded agency tools. Client categories and assigned teams are in each client’s edit form. **Client workspace** opens that client’s notes, links and related records.
 
 ## Run the demo locally
 
@@ -78,10 +86,13 @@ Fork creates your own GitHub copy. Download ZIP gives you the source without Git
 
 Back up all application tables, including `agency_workspaces`, private upload/contract objects, and your Auth configuration. Test a restore into a separate project. The demo's JSON export is not a full-app disaster recovery backup.
 
-Demo limits: 100 clients, 200 tasks per client, 200 recent activity entries, 2 MB JSON imports. Clearing browser storage removes demo records. The full app's provider delivery, separately authenticated staff accounts, recovery and AI accuracy require further validation before customer production use.
+Demo limits: 100 clients, 100 staff, 50 categories, 200 tasks per client plus 200 agency tasks, 200 records per client tool, 1,000 daily checks/time entries each, 200 recent activity entries and 2 MB JSON imports. Clearing browser storage removes demo records. The full app's provider delivery, separately authenticated staff accounts, recovery and AI accuracy require further validation before customer production use.
 
 ## Validation and languages
 
-The release build and TypeScript check pass. Browser tests cover client creation/search, draft persistence, all intake steps, repeat submissions, tasks, branding contrast, exports, backup restoration, archive/restore and the guided tour. All six demo screens were checked at 320, 390, 768 and 1440 pixels. These checks do not verify live email or payment delivery.
+Demo browser checks cover the original intake/brief flow and the new staff/category/client records, seven task views, comments, daily review reset, timers/manual hours, workflow approvals, five report views, CSV/print, archive retention and complete backup restoration. All 13 screens were checked at 320, 390, 768 and 1440 pixels. Data checks cover legacy-record preservation, multiple assignees, unsafe-link stripping and backup limits. No live Supabase staff sign-in was tested.
+
+Repeat the data checks with `node scripts/test-demo-data.cjs`. With Playwright and Chrome available, serve `demo` locally and run `node scripts/test-demo-agency.cjs http://localhost:8080`. Set `PLAYWRIGHT_MODULE` to an existing Playwright installation if it is not installed in this project. Browser test fixtures and screenshots are written to the operating system temporary folder.
+
 
 TypeScript, JavaScript, HTML, CSS and SQL; React, Next.js, Supabase and Cloudflare Workers.
